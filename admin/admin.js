@@ -1,64 +1,109 @@
-<!doctype html>
-<html lang="fa" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>پنل مدیریت | کات فوم</title>
-  <style>
-    body{font-family:Tahoma,system-ui;margin:24px;background:#0f172a;color:#e5e7eb}
-    .card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:16px;margin-bottom:16px}
-    input,textarea,select,button{padding:10px;border-radius:8px;border:1px solid #374151;background:#0b1220;color:#e5e7eb}
-    button{cursor:pointer}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .col{flex:1 1 280px}
-    img.thumb{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #374151}
-    .toolbar{display:flex;gap:8px;align-items:center}
-  </style>
-</head>
-<body>
-  <h2>پنل مدیریت – گروه تولیدی و خدماتی کات فوم</h2>
+// admin/admin.js
+document.addEventListener('DOMContentLoaded', () => {
+  const el = id => document.getElementById(id);
 
-  <div class="card">
-    <div class="row">
-      <div class="col">
-        <label>توکن گیت‌هاب (فقط بار اول):</label>
-        <input id="ghToken" type="password" placeholder="ghp_..." />
-      </div>
-      <div class="col">
-        <label>مالک/ریپو/برانچ</label>
-        <div class="row">
-          <input id="owner" placeholder="owner" />
-          <input id="repo" placeholder="repo" />
-          <input id="branch" placeholder="branch" />
+  // عناصر
+  const ghToken = el('ghToken');
+  const owner   = el('owner');
+  const repo    = el('repo');
+  const branch  = el('branch');
+  const status  = el('status');
+  const loadBtn = el('loadData');
+  const saveBtn = el('saveCreds');
+  const grid    = el('grid');
+
+  const newTitle    = el('newTitle');
+  const newPrice    = el('newPrice');
+  const newCategory = el('newCategory');
+  const newDesc     = el('newDesc');
+  const newFile     = el('newFile');
+  const addItemBtn  = el('addItem');
+
+  // بارگذاری از localStorage (فقط روی دستگاه خودت)
+  const readLS = k => localStorage.getItem(k) || '';
+  ghToken.value = ''; // توکن را برای امنیت، نمایش ندهیم
+  owner.value   = readLS('cf_owner');
+  repo.value    = readLS('cf_repo');
+  branch.value  = readLS('cf_branch') || 'main';
+
+  saveBtn.onclick = () => {
+    // هشدار: نگهداری توکن در localStorage امن نیست؛ فعلاً برای تست نذاریم
+    // localStorage.setItem('cf_token', ghToken.value);
+    localStorage.setItem('cf_owner', owner.value.trim());
+    localStorage.setItem('cf_repo', repo.value.trim());
+    localStorage.setItem('cf_branch', branch.value.trim());
+    status.textContent = 'ذخیره شد.';
+    setTimeout(()=> status.textContent = '', 2000);
+  };
+
+  loadBtn.onclick = async () => {
+    status.textContent = 'در حال خواندن داده‌ها...';
+    grid.innerHTML = '';
+    try {
+      // چون داخل پوشه admin هستیم، مسیر کانفیگ نسبی است
+      const resp = await fetch('../assets/config.json', { cache: 'no-cache' });
+      const data = await resp.json();
+      renderItems(data);
+      status.textContent = 'آماده.';
+    } catch (e) {
+      console.error(e);
+      status.textContent = 'خطا در خواندن config.json';
+    }
+  };
+
+  function renderItems(data){
+    const items = data.items || data.gallery || data.works || [];
+    if (!items.length){
+      grid.innerHTML = '<p style="opacity:.7">موردی پیدا نشد. config.json را بررسی کنید.</p>';
+      return;
+    }
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(220px,1fr))';
+    grid.style.gap = '12px';
+
+    items.forEach((it, idx) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const imgSrc = it.src || it.image || it.url || it.path || '';
+      const title  = it.title || it.caption || it.name || `مورد ${idx+1}`;
+      const price  = it.price ? ` | قیمت: ${it.price}` : '';
+      const cat    = it.category ? ` (${it.category})` : '';
+
+      card.innerHTML = `
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <img class="thumb" src="${imgSrc}" alt="">
+          <div style="flex:1">
+            <div style="font-weight:bold">${title}${cat}${price}</div>
+            <div style="opacity:.8;font-size:.9rem">${it.desc || it.description || ''}</div>
+            <div class="toolbar" style="margin-top:8px">
+              <button data-idx="${idx}" class="btn-edit">ویرایش</button>
+              <button data-idx="${idx}" class="btn-del">حذف</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col toolbar">
-        <button id="saveCreds">ذخیره</button>
-        <button id="loadData">بارگذاری نمونه‌کارها</button>
-        <span id="status"></span>
-      </div>
-    </div>
-  </div>
+      `;
+      grid.appendChild(card);
+    });
 
-  <div class="card">
-    <h3>افزودن نمونه‌کار جدید</h3>
-    <div class="row">
-      <input id="newTitle" class="col" placeholder="عنوان" />
-      <input id="newPrice" class="col" placeholder="قیمت (اختیاری)" />
-      <input id="newCategory" class="col" placeholder="دسته مثل: فوم سقفی" />
-    </div>
-    <textarea id="newDesc" rows="3" style="width:100%;margin-top:8px" placeholder="توضیحات"></textarea>
-    <div class="row" style="margin-top:8px">
-      <input id="newFile" type="file" accept="image/*" />
-      <button id="addItem">افزودن</button>
-    </div>
-  </div>
+    // هنوز حذف/ویرایش را به گیت‌هاب نمی‌فرستیم (برای امنیت)، فقط هشدار می‌دهیم
+    grid.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      if (btn.classList.contains('btn-edit')) {
+        alert('ویرایش آیتم: این بخش به سرور/اکشن امن متصل می‌شود (توکن در کلاینت استفاده نخواهد شد).');
+      }
+      if (btn.classList.contains('btn-del')) {
+        alert('حذف آیتم: این بخش به سرور/اکشن امن متصل می‌شود (توکن در کلاینت استفاده نخواهد شد).');
+      }
+    }, { once:true });
+  }
 
-  <div class="card">
-    <h3>لیست نمونه‌کارها</h3>
-    <div id="grid"></div>
-  </div>
-
-  <script src="./admin.js"></script>
-</body>
-</html>
+  addItemBtn.onclick = () => {
+    // مرحله‌ی بعد: ارسال به سرور امن/اکشن گیت‌هاب
+    if(!newFile.files[0]){
+      alert('لطفاً تصویر را انتخاب کنید.');
+      return;
+    }
+    alert('افزودن مورد جدید: در نسخهٔ امن، فایل به سرور ارسال و سپس commit می‌شود.');
+  };
+});
