@@ -1,44 +1,64 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>گروه تولیدی و خدماتی کات فوم | Cut Foam Factory</title>
-  <meta name="description" content="کات فوم؛ طراحی و برش CNC یونولیت (EPS)، ساخت قطعات قالب ریخته‌گری و بسته‌بندی صنعتی.">
-  <link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>پنل مدیریت | کات فوم</title>
+  <style>
+    body{font-family:Tahoma,system-ui;margin:24px;background:#0f172a;color:#e5e7eb}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:16px;margin-bottom:16px}
+    input,textarea,select,button{padding:10px;border-radius:8px;border:1px solid #374151;background:#0b1220;color:#e5e7eb}
+    button{cursor:pointer}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .col{flex:1 1 280px}
+    img.thumb{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #374151}
+    .toolbar{display:flex;gap:8px;align-items:center}
+  </style>
 </head>
 <body>
-  <header class="hdr" id="top">
-    <div class="wrap nav">
-      <a href="#top" class="brand">
-        <div class="logo">CF</div>
-        <div class="brand-text"><strong>گروه تولیدی و خدماتی کات فوم</strong><small>Cut Foam — EPS Packaging & CNC</small></div>
-      </a>
-      <button class="hamb" id="hamb">☰</button>
-      <nav class="menu" id="menu"><a href="#services">خدمات</a><a href="#gallery">نمونه‌کار</a><a href="#contact">تماس</a></nav>
-    </div>
-  </header>
-  <section class="hero">
-    <div class="wrap hero-inner">
-      <div class="hero-copy">
-        <h1>برش و بسته‌بندی یونولیت (EPS) — دقیق، تمیز، صنعتی</h1>
-        <p class="lead">طراحی سفارشی، برش CNC، ساخت قطعات قالب ریخته‌گری و محافظت حرفه‌ای.</p>
-        <div class="cta"><a class="btn primary" href="https://wa.me/989923550206" target="_blank" rel="noopener">واتساپ فروش</a><a class="btn ghost" href="#gallery">مشاهده نمونه‌کار</a></div>
-        <ul class="badges"><li>تحویل سریع</li><li>دانسیته یکنواخت</li><li>طراحی سفارشی</li></ul>
+  <h2>پنل مدیریت – گروه تولیدی و خدماتی کات فوم</h2>
+
+  <div class="card">
+    <div class="row">
+      <div class="col">
+        <label>توکن گیت‌هاب (فقط بار اول):</label>
+        <input id="ghToken" type="password" placeholder="ghp_..." />
       </div>
-      <div class="hero-visual"><div class="hero-card">لایه حفاظتی صنعتی برای حمل‌ونقل ایمن</div><div class="hero-mini"><div class="mini-card">CNC چندمحوره</div><div class="mini-card">قالب ریخته‌گری</div></div></div>
+      <div class="col">
+        <label>مالک/ریپو/برانچ</label>
+        <div class="row">
+          <input id="owner" placeholder="owner" />
+          <input id="repo" placeholder="repo" />
+          <input id="branch" placeholder="branch" />
+        </div>
+      </div>
+      <div class="col toolbar">
+        <button id="saveCreds">ذخیره</button>
+        <button id="loadData">بارگذاری نمونه‌کارها</button>
+        <span id="status"></span>
+      </div>
     </div>
-  </section>
-  <section id="services" class="wrap grid">
-    <article class="card"><h3>فوم بسته‌بندی لوازم خانگی</h3><p>طراحی اختصاصی، ضربه‌گیری عالی، فیکس داخل کارتن.</p></article>
-    <article class="card"><h3>تراشکاری و برش CNC یونولیت (EPS)</h3><p>دقت میلی‌متری، اجرای قطعات پیچیده.</p></article>
-    <article class="card"><h3>ساخت قطعات قالب ریخته‌گری</h3><p>طبق نقشه و نمونه؛ آماده‌سازی سریع.</p></article>
-    <article class="card"><h3>نمونه‌سازی و ماکت صنعتی</h3><p>سریع و اقتصادی برای تست و ارائه.</p></article>
-  </section>
-  <section id="gallery" class="wrap"><div class="section-head"><h2>نمونه‌کارها</h2></div><div id="grid" class="gallery"></div></section>
-  <section id="contact" class="wrap contact">
-    <h2>اطلاعات تماس</h2>
-    <ul><li>📞 مدیر تولید: 09926767096 / 09038409647</li><li>💼 واحد فروش (واتساپ): <a href="https://wa.me/989923550206" target="_blank" rel="noopener">09923550206</a></li><li>✉️ ایمیل: <a href="mailto:midenlock@gmail.com">midenlock@gmail.com</a></li><li>📍 آدرس: تهران، پاکدشت، فرون‌آباد، اول جاده گاز، بعد از کوچه غلامحسین باغریان</li></ul>
-  </section>
-  <footer class="ftr"><div class="wrap ftr-row"><p>© <span id="year"></span> کات فوم — همهٔ حقوق محفوظ است.</p><a class="btn tiny" href="#top">بازگشت به بالا ↑</a></div></footer>
-  <script src="assets/site.js"></script>
-</body></html>
+  </div>
+
+  <div class="card">
+    <h3>افزودن نمونه‌کار جدید</h3>
+    <div class="row">
+      <input id="newTitle" class="col" placeholder="عنوان" />
+      <input id="newPrice" class="col" placeholder="قیمت (اختیاری)" />
+      <input id="newCategory" class="col" placeholder="دسته مثل: فوم سقفی" />
+    </div>
+    <textarea id="newDesc" rows="3" style="width:100%;margin-top:8px" placeholder="توضیحات"></textarea>
+    <div class="row" style="margin-top:8px">
+      <input id="newFile" type="file" accept="image/*" />
+      <button id="addItem">افزودن</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>لیست نمونه‌کارها</h3>
+    <div id="grid"></div>
+  </div>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
