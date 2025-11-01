@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>پنل مدیریت سایت کات فوم</title>
+  <style>
+    body{font-family:system-ui,tahoma;max-width:1100px;margin:32px auto;padding:0 16px;background:#0f1318;color:#eaeef3}
+    h1{font-size:20px;margin:0 0 16px}
+    .card{background:#141a21;border:1px solid #223041;border-radius:12px;padding:16px;margin:12px 0}
+    label{display:block;margin:8px 0 4px}
+    input,textarea,select{width:100%;background:#0d1117;border:1px solid #223041;border-radius:10px;color:#eaeef3;padding:10px}
+    .row{display:grid;gap:12px}
+    @media(min-width:720px){.row{grid-template-columns:1fr 1fr}}
+    button{background:#3b82f6;border:none;color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer}
+    button.secondary{background:#2b3543}
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+    .thumb{background:#0d1117;border:1px dashed #2b3543;border-radius:10px;padding:10px}
+    .muted{opacity:.75;font-size:12px}
+    .danger{background:#ef4444}
+  </style>
+</head>
+<body>
+  <h1>پنل مدیریت سایت کات فوم</h1>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>GitHub Token (scope: <code>public_repo</code>)</label>
+        <input id="token" type="password" placeholder="ghp_..." />
+      </div>
+      <div>
+        <label>Owner/Repo</label>
+        <input id="repo" placeholder="midenlock-wq/cut-foam-site" />
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button id="saveAuth">ذخیره و اتصال</button>
+      <button class="secondary" id="clearAuth">حذف توکن از مرورگر</button>
+      <span id="status" class="muted"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">اطلاعات کلی سایت</h2>
+    <div class="row">
+      <div><label>نام برند</label><input id="brand"/></div>
+      <div><label>شعار</label><input id="tagline"/></div>
+    </div>
+    <div class="row">
+      <div><label>اینستاگرام (لینک)</label><input id="instagram"/></div>
+      <div><label>واتساپ (لینک)</label><input id="whatsapp"/></div>
+    </div>
+    <div class="row">
+      <div><label>تلفن</label><input id="phone"/></div>
+      <div><label>بنر تبلیغاتی هدر (اختیاری)</label><input id="bannerText" placeholder="مثلاً: سفارش عمده با تخفیف ویژه"/></div>
+    </div>
+    <div style="margin-top:10px"><button id="saveBasics">ذخیره اطلاعات</button></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">گالری نمونه‌کارها</h2>
+    <p class="muted">عکس‌ها را بکش و دراپ کن یا انتخاب کن. سپس عنوان/کپشن بده و «انتشار» را بزن.</p>
+    <input id="filePicker" type="file" accept="image/*" multiple />
+    <div id="gallery" class="grid" style="margin-top:12px"></div>
+    <div style="margin-top:10px"><button id="publishGallery">انتشار گالری</button></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">بخش‌های خدمات (قیمت/توضیحات)</h2>
+    <div id="sections"></div>
+    <div style="margin-top:10px"><button id="saveSections">ذخیره بخش‌ها</button></div>
+  </div>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
