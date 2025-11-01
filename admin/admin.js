@@ -1,208 +1,64 @@
-// ---- تنظیمات پایه ----
-const els = id => document.getElementById(id);
-const state = {
-  shaConfig: null,
-  config: null,
-  repoFull: null,
-  token: null,
-};
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>پنل مدیریت | کات فوم</title>
+  <style>
+    body{font-family:Tahoma,system-ui;margin:24px;background:#0f172a;color:#e5e7eb}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:16px;margin-bottom:16px}
+    input,textarea,select,button{padding:10px;border-radius:8px;border:1px solid #374151;background:#0b1220;color:#e5e7eb}
+    button{cursor:pointer}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .col{flex:1 1 280px}
+    img.thumb{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #374151}
+    .toolbar{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <h2>پنل مدیریت – گروه تولیدی و خدماتی کات فوم</h2>
 
-function setStatus(msg){ els('status').textContent = msg || ''; }
-
-function loadAuth(){
-  const saved = JSON.parse(localStorage.getItem('cf_admin_auth')||'{}');
-  if(saved.token) els('token').value = saved.token;
-  if(saved.repo) els('repo').value = saved.repo;
-}
-function saveAuth(){
-  const token = els('token').value.trim();
-  const repo = els('repo').value.trim();
-  if(!token || !repo) return alert('توکن و ریپو را وارد کن');
-  localStorage.setItem('cf_admin_auth', JSON.stringify({token, repo}));
-  setStatus('ذخیره شد. درحال اتصال…');
-  connect();
-}
-function clearAuth(){
-  localStorage.removeItem('cf_admin_auth');
-  els('token').value = '';
-  els('repo').value = '';
-  setStatus('توکن از مرورگر حذف شد.');
-}
-
-// ---- GitHub API helpers ----
-async function gh(path, method='GET', body){
-  const url = `https://api.github.com${path}`;
-  const res = await fetch(url, {
-    method,
-    headers:{
-      'Authorization': `token ${state.token}`,
-      'Accept':'application/vnd.github+json'
-    },
-    body: body ? JSON.stringify(body) : undefined
-  });
-  if(!res.ok){
-    const t = await res.text();
-    throw new Error(`GitHub ${res.status}: ${t}`);
-  }
-  return res.json();
-}
-
-async function getFile(path){
-  const [owner, repo] = state.repoFull.split('/');
-  const data = await gh(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`);
-  const content = atob(data.content);
-  return {content, sha: data.sha};
-}
-async function putFile(path, content, message, sha=null){
-  const [owner, repo] = state.repoFull.split('/');
-  const body = {
-    message,
-    content: btoa(unescape(encodeURIComponent(content))),
-    branch: 'main'
-  };
-  if(sha) body.sha = sha;
-  return gh(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`, 'PUT', body);
-}
-async function putBinary(path, file, message){
-  const buf = await file.arrayBuffer();
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-  const [owner, repo] = state.repoFull.split('/');
-  return gh(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`, 'PUT', {
-    message, content: b64, branch:'main'
-  });
-}
-
-// ---- بارگیری و رندر config.json ----
-async function connect(){
-  try{
-    const saved = JSON.parse(localStorage.getItem('cf_admin_auth')||'{}');
-    state.token = saved.token || els('token').value.trim();
-    state.repoFull = saved.repo || els('repo').value.trim();
-    if(!state.token || !state.repoFull) return;
-
-    setStatus('درحال دریافت تنظیمات…');
-    const {content, sha} = await getFile('assets/config.json');
-    state.shaConfig = sha;
-    state.config = JSON.parse(content);
-
-    // پرکردن فرم‌ها
-    els('brand').value = state.config.brand || '';
-    els('tagline').value = state.config.tagline || '';
-    els('instagram').value = state.config.instagram || '';
-    els('whatsapp').value = state.config.whatsapp || '';
-    els('phone').value = state.config.phone || '';
-    els('bannerText').value = state.config.bannerText || '';
-
-    renderGallery();
-    renderSections();
-    setStatus('متصل شد ✔️');
-  }catch(e){
-    console.error(e);
-    setStatus('اتصال ناموفق: ' + e.message);
-  }
-}
-
-function renderGallery(){
-  const wrap = document.getElementById('gallery');
-  wrap.innerHTML = '';
-  const items = (state.config?.sections?.gallery?.items)||[];
-  for(const it of items){
-    const div = document.createElement('div');
-    div.className = 'thumb';
-    div.innerHTML = `
-      <img src="../${it.image}" style="width:100%;height:140px;object-fit:cover;border-radius:8px" />
-      <label>عنوان</label><input value="${it.title||''}" data-k="title">
-      <label>کپشن</label><input value="${it.caption||''}" data-k="caption">
-      <div class="muted" style="margin-top:6px">${it.image}</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="danger" data-action="del">حذف</button>
+  <div class="card">
+    <div class="row">
+      <div class="col">
+        <label>توکن گیت‌هاب (فقط بار اول):</label>
+        <input id="ghToken" type="password" placeholder="ghp_..." />
       </div>
-    `;
-    // bind
-    div.querySelector('[data-action="del"]').onclick = () => {
-      const arr = state.config.sections.gallery.items;
-      const idx = arr.indexOf(it);
-      if(idx>-1){ arr.splice(idx,1); renderGallery(); }
-    };
-    for(const inp of div.querySelectorAll('input[data-k]')){
-      inp.oninput = () => { it[inp.dataset.k] = inp.value; };
-    }
-    wrap.appendChild(div);
-  }
-}
-
-function renderSections(){
-  const host = document.getElementById('sections');
-  host.innerHTML = '';
-  const secs = state.config.sections || {};
-  // کارت‌های خدمات نمونه (دو مورد پیش‌فرض)
-  const keys = Object.keys(secs).filter(k => k!=='gallery');
-  for(const key of keys){
-    const s = secs[key];
-    const box = document.createElement('div');
-    box.className = 'card';
-    box.innerHTML = `
-      <h3 style="margin:0 0 8px">${s.title||key}</h3>
-      <label>عنوان</label><input value="${s.title||''}" data-k="title">
-      <label>توضیحات</label><textarea rows="3" data-k="desc">${s.desc||''}</textarea>
-      <div class="row">
-        <div><label>قیمت</label><input value="${s.price||''}" data-k="price"></div>
-        <div><label>واحد</label><input value="${s.unit||''}" data-k="unit"></div>
+      <div class="col">
+        <label>مالک/ریپو/برانچ</label>
+        <div class="row">
+          <input id="owner" placeholder="owner" />
+          <input id="repo" placeholder="repo" />
+          <input id="branch" placeholder="branch" />
+        </div>
       </div>
-    `;
-    for(const el of box.querySelectorAll('[data-k]')){
-      el.oninput = () => { s[el.dataset.k] = el.value; };
-    }
-    host.appendChild(box);
-  }
-}
+      <div class="col toolbar">
+        <button id="saveCreds">ذخیره</button>
+        <button id="loadData">بارگذاری نمونه‌کارها</button>
+        <span id="status"></span>
+      </div>
+    </div>
+  </div>
 
-// ---- رویدادها ----
-document.getElementById('saveAuth').onclick = saveAuth;
-document.getElementById('clearAuth').onclick = clearAuth;
+  <div class="card">
+    <h3>افزودن نمونه‌کار جدید</h3>
+    <div class="row">
+      <input id="newTitle" class="col" placeholder="عنوان" />
+      <input id="newPrice" class="col" placeholder="قیمت (اختیاری)" />
+      <input id="newCategory" class="col" placeholder="دسته مثل: فوم سقفی" />
+    </div>
+    <textarea id="newDesc" rows="3" style="width:100%;margin-top:8px" placeholder="توضیحات"></textarea>
+    <div class="row" style="margin-top:8px">
+      <input id="newFile" type="file" accept="image/*" />
+      <button id="addItem">افزودن</button>
+    </div>
+  </div>
 
-document.getElementById('saveBasics').onclick = async () => {
-  if(!state.config) return;
-  state.config.brand = els('brand').value.trim();
-  state.config.tagline = els('tagline').value.trim();
-  state.config.instagram = els('instagram').value.trim();
-  state.config.whatsapp = els('whatsapp').value.trim();
-  state.config.phone = els('phone').value.trim();
-  state.config.bannerText = els('bannerText').value.trim();
-  await saveConfig('Update basics');
-};
+  <div class="card">
+    <h3>لیست نمونه‌کارها</h3>
+    <div id="grid"></div>
+  </div>
 
-document.getElementById('saveSections').onclick = async () => {
-  await saveConfig('Update sections');
-};
-
-document.getElementById('filePicker').onchange = async e => {
-  const files = [...e.target.files];
-  if(!files.length) return;
-  const items = state.config.sections.gallery.items;
-
-  setStatus('درحال آپلود تصاویر…');
-  for(const f of files){
-    const ext = f.name.split('.').pop().toLowerCase();
-    const name = `img-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const path = `assets/images/${name}`;
-    await putBinary(path, f, `Add image ${name}`);
-    items.unshift({ title:'', caption:'', image: path }); // بالای لیست
-  }
-  await saveConfig('Update gallery list (after uploads)');
-  renderGallery();
-  setStatus('آپلود و به‌روزرسانی انجام شد ✔️');
-};
-
-async function saveConfig(message){
-  const json = JSON.stringify(state.config, null, 2);
-  await putFile('assets/config.json', json, message, state.shaConfig);
-  // دریافت sha جدید
-  const {sha} = await getFile('assets/config.json');
-  state.shaConfig = sha;
-  setStatus('ذخیره شد ✔️');
-}
-
-// بار اول
-loadAuth();
-connect();
+  <script src="./admin.js"></script>
+</body>
+</html>
